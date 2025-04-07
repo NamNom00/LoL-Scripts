@@ -1,0 +1,298 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+
+local GAME_ID = 115792036640780
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PickASkillUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
+local function makeDraggable(frame, dragPart)
+    local dragging = false
+    local dragInput
+    local dragStart
+    local startPos
+    
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+    
+    dragPart.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    dragPart.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
+
+local function isInCorrectGame()
+    return game.PlaceId == GAME_ID
+end
+
+local function createWrongGameUI()
+    local WarningFrame = Instance.new("Frame")
+    WarningFrame.Name = "WarningFrame"
+    WarningFrame.Size = UDim2.new(0, 300, 0, 150)
+    WarningFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+    WarningFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    WarningFrame.BorderSizePixel = 0
+    WarningFrame.Parent = ScreenGui
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = WarningFrame
+    
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+    TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+    TitleLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    TitleLabel.BorderSizePixel = 0
+    TitleLabel.Text = "Wrong Game"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.TextSize = 18
+    TitleLabel.Parent = WarningFrame
+    
+    local TitleCorner = Instance.new("UICorner")
+    TitleCorner.CornerRadius = UDim.new(0, 10)
+    TitleCorner.Parent = TitleLabel
+    
+    local CornerFix = Instance.new("Frame")
+    CornerFix.Name = "CornerFix"
+    CornerFix.Size = UDim2.new(1, 0, 0.5, 0)
+    CornerFix.Position = UDim2.new(0, 0, 0.5, 0)
+    CornerFix.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    CornerFix.BorderSizePixel = 0
+    CornerFix.Parent = TitleLabel
+    
+    local MessageLabel = Instance.new("TextLabel")
+    MessageLabel.Name = "MessageLabel"
+    MessageLabel.Size = UDim2.new(1, -20, 0, 60)
+    MessageLabel.Position = UDim2.new(0, 10, 0, 40)
+    MessageLabel.BackgroundTransparency = 1
+    MessageLabel.Text = "Would you like to join Pick a Skill for this script to work?"
+    MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MessageLabel.Font = Enum.Font.SourceSans
+    MessageLabel.TextSize = 16
+    MessageLabel.TextWrapped = true
+    MessageLabel.Parent = WarningFrame
+    
+    local JoinButton = Instance.new("TextButton")
+    JoinButton.Name = "JoinButton"
+    JoinButton.Size = UDim2.new(0, 120, 0, 40)
+    JoinButton.Position = UDim2.new(0.5, -60, 1, -50)
+    JoinButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    JoinButton.BorderSizePixel = 0
+    JoinButton.Text = "Join Game"
+    JoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    JoinButton.Font = Enum.Font.SourceSansBold
+    JoinButton.TextSize = 16
+    JoinButton.Parent = WarningFrame
+    
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 6)
+    ButtonCorner.Parent = JoinButton
+    
+    JoinButton.MouseButton1Click:Connect(function()
+        game:GetService("TeleportService"):Teleport(GAME_ID, LocalPlayer)
+    end)
+    
+    JoinButton.MouseEnter:Connect(function()
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(JoinButton, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 100, 180)})
+        tween:Play()
+    end)
+    
+    JoinButton.MouseLeave:Connect(function()
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(JoinButton, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 120, 215)})
+        tween:Play()
+    end)
+    
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Text = "✖"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 16
+    CloseButton.Font = Enum.Font.SourceSansBold
+    CloseButton.Parent = TitleLabel
+    
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    makeDraggable(WarningFrame, TitleLabel)
+end
+
+local function createExploitUI()
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 250, 0, 250)
+    MainFrame.Position = UDim2.new(0.5, -125, 0.5, -125)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+    
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+    
+    local TitleCorner = Instance.new("UICorner")
+    TitleCorner.CornerRadius = UDim.new(0, 10)
+    TitleCorner.Parent = TitleBar
+    
+    local CornerFix = Instance.new("Frame")
+    CornerFix.Name = "CornerFix"
+    CornerFix.Size = UDim2.new(1, 0, 0.5, 0)
+    CornerFix.Position = UDim2.new(0, 0, 0.5, 0)
+    CornerFix.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    CornerFix.BorderSizePixel = 0
+    CornerFix.Parent = TitleBar
+    
+    local TitleText = Instance.new("TextLabel")
+    TitleText.Name = "TitleText"
+    TitleText.Size = UDim2.new(1, -60, 1, 0)
+    TitleText.Position = UDim2.new(0, 10, 0, 0)
+    TitleText.BackgroundTransparency = 1
+    TitleText.Text = "Pick a Skill Exploit"
+    TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleText.TextSize = 16
+    TitleText.Font = Enum.Font.SourceSansBold
+    TitleText.TextXAlignment = Enum.TextXAlignment.Left
+    TitleText.Parent = TitleBar
+    
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Text = "✖"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 16
+    CloseButton.Font = Enum.Font.SourceSansBold
+    CloseButton.Parent = TitleBar
+    
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Name = "ContentFrame"
+    ContentFrame.Size = UDim2.new(1, -20, 1, -40)
+    ContentFrame.Position = UDim2.new(0, 10, 0, 35)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.Parent = MainFrame
+    
+    local StatusLabel = Instance.new("TextLabel")
+    StatusLabel.Name = "StatusLabel"
+    StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+    StatusLabel.Position = UDim2.new(0, 0, 1, -25)
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Text = "Ready"
+    StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    StatusLabel.TextSize = 14
+    StatusLabel.Font = Enum.Font.SourceSans
+    StatusLabel.Parent = ContentFrame
+    
+    local function createButton(text, position, callback)
+        local Button = Instance.new("TextButton")
+        Button.Name = text .. "Button"
+        Button.Size = UDim2.new(1, 0, 0, 35)
+        Button.Position = position
+        Button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+        Button.BorderSizePixel = 0
+        Button.Text = text
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.TextSize = 14
+        Button.Font = Enum.Font.SourceSansBold
+        Button.Parent = ContentFrame
+        
+        local ButtonCorner = Instance.new("UICorner")
+        ButtonCorner.CornerRadius = UDim.new(0, 6)
+        ButtonCorner.Parent = Button
+        
+        Button.MouseButton1Click:Connect(function()
+            local success, err = pcall(callback)
+            if success then
+                StatusLabel.Text = text .. " activated!"
+                StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            else
+                StatusLabel.Text = "Error: " .. tostring(err):sub(1, 30)
+                StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            end
+        end)
+        
+        Button.MouseEnter:Connect(function()
+            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tween = TweenService:Create(Button, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 100, 180)})
+            tween:Play()
+        end)
+        
+        Button.MouseLeave:Connect(function()
+            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tween = TweenService:Create(Button, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 120, 215)})
+            tween:Play()
+        end)
+        
+        return Button
+    end
+    
+    createButton("Free VIP", UDim2.new(0, 0, 0, 0), function()
+        LocalPlayer.SavedData.HasVIP.Value = true
+    end)
+    
+    createButton("INF Health", UDim2.new(0, 0, 0, 45), function()
+        LocalPlayer.SavedData.HasInfiniteHeals.Value = true
+    end)
+    
+    createButton("INF Spins", UDim2.new(0, 0, 0, 90), function()
+        LocalPlayer.SavedData.Spins.Value = 999999999
+    end)
+    
+    createButton("INF Revive", UDim2.new(0, 0, 0, 135), function()
+        LocalPlayer.SavedData.Revives.Value = 999999999
+    end)
+    
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    makeDraggable(MainFrame, TitleBar)
+end
+
+if isInCorrectGame() then
+    createExploitUI()
+else
+    createWrongGameUI()
+end
