@@ -1,17 +1,19 @@
 local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
-local GAME_ID = 115792036640780
-local TITLE = "Pick A Skill GUI"
+local GAME_ID = 82593820387667
+local MIN_VALUE = 1
+local MAX_VALUE = 1000000
 
 local function isInCorrectGame()
     return game.PlaceId == GAME_ID
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "PickASkillGUI"
+ScreenGui.Name = "ArcaneStoreMoneyUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game:GetService("CoreGui")
@@ -96,7 +98,7 @@ local function createWrongGameUI()
     MessageLabel.Size = UDim2.new(1, -20, 0, 60)
     MessageLabel.Position = UDim2.new(0, 10, 0, 40)
     MessageLabel.BackgroundTransparency = 1
-    MessageLabel.Text = "Would you like to join Pick A Skill for this script to work?"
+    MessageLabel.Text = "Would you like to join Arcane Store Simulator for this script to work?"
     MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     MessageLabel.Font = Enum.Font.SourceSans
     MessageLabel.TextSize = 16
@@ -120,7 +122,7 @@ local function createWrongGameUI()
     ButtonCorner.Parent = JoinButton
     
     JoinButton.MouseButton1Click:Connect(function()
-        game:GetService("TeleportService"):Teleport(GAME_ID, LocalPlayer)
+        TeleportService:Teleport(GAME_ID, LocalPlayer)
     end)
     
     JoinButton.MouseEnter:Connect(function()
@@ -153,152 +155,11 @@ local function createWrongGameUI()
     makeDraggable(WarningFrame, TitleLabel)
 end
 
-local function createToggleButton(parent, position, text, path, isToggle)
-    local Button = Instance.new("Frame")
-    Button.Name = text.."Button"
-    Button.Size = UDim2.new(1, -20, 0, 40)
-    Button.Position = position
-    Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    Button.BorderSizePixel = 0
-    Button.Parent = parent
-    
-    local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.CornerRadius = UDim.new(0, 6)
-    ButtonCorner.Parent = Button
-    
-    local ButtonLabel = Instance.new("TextLabel")
-    ButtonLabel.Name = "ButtonLabel"
-    ButtonLabel.Size = UDim2.new(isToggle and 0.7 or 1, 0, 1, 0)
-    ButtonLabel.BackgroundTransparency = 1
-    ButtonLabel.Text = text
-    ButtonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ButtonLabel.TextSize = 16
-    ButtonLabel.Font = Enum.Font.SourceSansBold
-    ButtonLabel.Parent = Button
-    
-    local StatusLabel
-    local ToggleIndicator
-    
-    if isToggle then
-        ToggleIndicator = Instance.new("Frame")
-        ToggleIndicator.Name = "ToggleIndicator"
-        ToggleIndicator.Size = UDim2.new(0, 20, 0, 20)
-        ToggleIndicator.Position = UDim2.new(0.85, 0, 0.5, -10)
-        ToggleIndicator.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-        ToggleIndicator.BorderSizePixel = 0
-        ToggleIndicator.Parent = Button
-        
-        local ToggleCorner = Instance.new("UICorner")
-        ToggleCorner.CornerRadius = UDim.new(0, 4)
-        ToggleCorner.Parent = ToggleIndicator
-    else
-        StatusLabel = Instance.new("TextLabel")
-        StatusLabel.Name = "StatusLabel"
-        StatusLabel.Size = UDim2.new(0, 80, 0, 20)
-        StatusLabel.Position = UDim2.new(1, -90, 0.5, -10)
-        StatusLabel.BackgroundTransparency = 1
-        StatusLabel.Text = ""
-        StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-        StatusLabel.TextSize = 14
-        StatusLabel.Font = Enum.Font.SourceSans
-        StatusLabel.Parent = Button
-    end
-    
-    -- Make the button clickable
-    local ButtonClick = Instance.new("TextButton")
-    ButtonClick.Name = "ButtonClick"
-    ButtonClick.Size = UDim2.new(1, 0, 1, 0)
-    ButtonClick.BackgroundTransparency = 1
-    ButtonClick.Text = ""
-    ButtonClick.Parent = Button
-    
-    local isEnabled = false
-    
-    -- Function to update visual state
-    local function updateVisualState()
-        if isToggle then
-            if isEnabled then
-                ToggleIndicator.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-            else
-                ToggleIndicator.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-            end
-        else
-            if StatusLabel.Text ~= "Done!" then
-                StatusLabel.Text = "Done!"
-                StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-                
-                -- Reset after 2 seconds
-                task.delay(2, function()
-                    StatusLabel.Text = ""
-                end)
-            end
-        end
-    end
-    
-    -- Function to update game value
-    local function updateValue()
-        local success, err = pcall(function()
-            if isToggle then
-                local parts = string.split(path, ".")
-                local value = _G
-                
-                for i = 1, #parts - 1 do
-                    value = value[parts[i]]
-                end
-                
-                value[parts[#parts]] = isEnabled
-            else
-                loadstring(path)()
-                updateVisualState()
-            end
-        end)
-        
-        if not success then
-            if isToggle then
-                isEnabled = not isEnabled -- Revert state if failed
-                updateVisualState()
-            end
-            
-            if not isToggle and StatusLabel then
-                StatusLabel.Text = "Error!"
-                StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-                
-                -- Reset after 2 seconds
-                task.delay(2, function()
-                    StatusLabel.Text = ""
-                end)
-            end
-        end
-    end
-    
-    ButtonClick.MouseButton1Click:Connect(function()
-        if isToggle then
-            isEnabled = not isEnabled
-            updateVisualState()
-        end
-        updateValue()
-    end)
-    
-    Button.MouseEnter:Connect(function()
-        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local tween = TweenService:Create(Button, tweenInfo, {BackgroundColor3 = Color3.fromRGB(70, 70, 70)})
-        tween:Play()
-    end)
-    
-    Button.MouseLeave:Connect(function()
-        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local tween = TweenService:Create(Button, tweenInfo, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
-        tween:Play()
-    end)
-    
-    return Button
-end
-
-local function createMainUI()
+local function createMoneyUI()
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 250, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
+    MainFrame.Size = UDim2.new(0, 250, 0, 200)
+    MainFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
     MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
@@ -331,7 +192,7 @@ local function createMainUI()
     TitleText.Size = UDim2.new(1, -60, 1, 0)
     TitleText.Position = UDim2.new(0, 10, 0, 0)
     TitleText.BackgroundTransparency = 1
-    TitleText.Text = TITLE
+    TitleText.Text = "Give Money"
     TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleText.TextSize = 16
     TitleText.Font = Enum.Font.SourceSansBold
@@ -349,85 +210,133 @@ local function createMainUI()
     CloseButton.Font = Enum.Font.SourceSansBold
     CloseButton.Parent = TitleBar
     
-    local ScrollingFrame = Instance.new("ScrollingFrame")
-    ScrollingFrame.Name = "ContentFrame"
-    ScrollingFrame.Size = UDim2.new(1, -10, 1, -40)
-    ScrollingFrame.Position = UDim2.new(0, 5, 0, 35)
-    ScrollingFrame.BackgroundTransparency = 1
-    ScrollingFrame.ScrollBarThickness = 4
-    ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 215) -- Will be adjusted based on content
-    ScrollingFrame.Parent = MainFrame
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Name = "ContentFrame"
+    ContentFrame.Size = UDim2.new(1, -20, 1, -40)
+    ContentFrame.Position = UDim2.new(0, 10, 0, 35)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.Parent = MainFrame
     
-    -- Create buttons
-    createToggleButton(
-        ScrollingFrame, 
-        UDim2.new(0, 10, 0, 10), 
-        "Free VIP", 
-        "game:GetService('Players').LocalPlayer.SavedData.HasVIP.Value = not game:GetService('Players').LocalPlayer.SavedData.HasVIP.Value", 
-        true
-    )
+    local InstructionLabel = Instance.new("TextLabel")
+    InstructionLabel.Name = "InstructionLabel"
+    InstructionLabel.Size = UDim2.new(1, 0, 0, 25)
+    InstructionLabel.Position = UDim2.new(0, 0, 0, 10)
+    InstructionLabel.BackgroundTransparency = 1
+    InstructionLabel.Text = "Enter money amount (1-1000000):"
+    InstructionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    InstructionLabel.TextSize = 14
+    InstructionLabel.Font = Enum.Font.SourceSans
+    InstructionLabel.Parent = ContentFrame
     
-    createToggleButton(
-        ScrollingFrame, 
-        UDim2.new(0, 10, 0, 60), 
-        "INF Health", 
-        "game:GetService('Players').LocalPlayer.SavedData.HasInfiniteHeals.Value = not game:GetService('Players').LocalPlayer.SavedData.HasInfiniteHeals.Value", 
-        true
-    )
+    local TextBox = Instance.new("TextBox")
+    TextBox.Name = "MoneyTextBox"
+    TextBox.Size = UDim2.new(1, 0, 0, 40)
+    TextBox.Position = UDim2.new(0, 0, 0, 45)
+    TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    TextBox.BorderSizePixel = 0
+    TextBox.Text = "1000"
+    TextBox.PlaceholderText = "Enter amount..."
+    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextBox.TextSize = 16
+    TextBox.Font = Enum.Font.SourceSans
+    TextBox.ClearTextOnFocus = false
+    TextBox.Parent = ContentFrame
     
-    createToggleButton(
-        ScrollingFrame, 
-        UDim2.new(0, 10, 0, 110), 
-        "INF Spins", 
-        "game:GetService('Players').LocalPlayer.SavedData.Spins.Value = 999999999", 
-        false
-    )
+    local TextBoxCorner = Instance.new("UICorner")
+    TextBoxCorner.CornerRadius = UDim.new(0, 6)
+    TextBoxCorner.Parent = TextBox
     
-    createToggleButton(
-        ScrollingFrame, 
-        UDim2.new(0, 10, 0, 160), 
-        "INF Revive", 
-        "game:GetService('Players').LocalPlayer.SavedData.Revives.Value = 999999999", 
-        false
-    )
+    local ExecuteButton = Instance.new("TextButton")
+    ExecuteButton.Name = "ExecuteButton"
+    ExecuteButton.Size = UDim2.new(1, 0, 0, 40)
+    ExecuteButton.Position = UDim2.new(0, 0, 0, 95)
+    ExecuteButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    ExecuteButton.BorderSizePixel = 0
+    ExecuteButton.Text = "Execute"
+    ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ExecuteButton.TextSize = 16
+    ExecuteButton.Font = Enum.Font.SourceSansBold
+    ExecuteButton.Parent = ContentFrame
+    
+    local ExecuteCorner = Instance.new("UICorner")
+    ExecuteCorner.CornerRadius = UDim.new(0, 6)
+    ExecuteCorner.Parent = ExecuteButton
+    
+    local StatusLabel = Instance.new("TextLabel")
+    StatusLabel.Name = "StatusLabel"
+    StatusLabel.Size = UDim2.new(1, 0, 0, 25)
+    StatusLabel.Position = UDim2.new(0, 0, 0, 145)
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Text = "Ready"
+    StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    StatusLabel.TextSize = 14
+    StatusLabel.Font = Enum.Font.SourceSans
+    StatusLabel.Parent = ContentFrame
+    
+    TextBox.Changed:Connect(function()
+        if TextBox.Text ~= "" then
+            local filtered = string.gsub(TextBox.Text, "[^%d]", "")
+            
+            local value = tonumber(filtered) or 0
+            if value > MAX_VALUE then
+                filtered = tostring(MAX_VALUE)
+            elseif value < MIN_VALUE and filtered ~= "" then
+                filtered = tostring(MIN_VALUE)
+            end
+            
+            if filtered ~= TextBox.Text then
+                TextBox.Text = filtered
+            end
+        end
+    end)
+    
+    ExecuteButton.MouseButton1Click:Connect(function()
+        local value = tonumber(TextBox.Text) or 0
+        
+        if value >= MIN_VALUE and value <= MAX_VALUE then
+            local success, err = pcall(function()
+                local moneyPath = LocalPlayer.Stats.MoneyCilent
+                if moneyPath then
+                    moneyPath.Value = value
+                    StatusLabel.Text = "Money set successfully!"
+                    StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+                else
+                    StatusLabel.Text = "Error: Money path not found"
+                    StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+                end
+            end)
+            
+            if not success then
+                StatusLabel.Text = "Error: " .. tostring(err):sub(1, 50)
+                StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            end
+        else
+            StatusLabel.Text = "Enter a value between 1-1000000"
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+        end
+    end)
     
     CloseButton.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
     end)
     
-    makeDraggable(MainFrame, TitleBar)
-    
-    -- Add indicator that it's running
-    local StatusIndicator = Instance.new("Frame")
-    StatusIndicator.Name = "StatusIndicator"
-    StatusIndicator.Size = UDim2.new(0, 8, 0, 8)
-    StatusIndicator.Position = UDim2.new(1, -10, 0, 11)
-    StatusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    StatusIndicator.BorderSizePixel = 0
-    StatusIndicator.Parent = TitleBar
-    
-    local StatusCorner = Instance.new("UICorner")
-    StatusCorner.CornerRadius = UDim.new(1, 0)
-    StatusCorner.Parent = StatusIndicator
-    
-    -- Blinking effect
-    spawn(function()
-        while ScreenGui.Parent ~= nil do
-            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-            local tween1 = TweenService:Create(StatusIndicator, tweenInfo, {BackgroundTransparency = 0.7})
-            local tween2 = TweenService:Create(StatusIndicator, tweenInfo, {BackgroundTransparency = 0})
-            
-            tween1:Play()
-            wait(1)
-            tween2:Play()
-            wait(1)
-        end
+    ExecuteButton.MouseEnter:Connect(function()
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(ExecuteButton, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 100, 180)})
+        tween:Play()
     end)
+    
+    ExecuteButton.MouseLeave:Connect(function()
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(ExecuteButton, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 120, 215)})
+        tween:Play()
+    end)
+    
+    makeDraggable(MainFrame, TitleBar)
 end
 
 if isInCorrectGame() then
-    createMainUI()
+    createMoneyUI()
 else
     createWrongGameUI()
 end
