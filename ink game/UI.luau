@@ -49,6 +49,6 @@ return {
     MainFrame = MainFrame,
     Buttons = {
         GodMode = GodModeButton,
-        Dalgona = DalgonaButton
+        Dalgona = AutoDalgona,
     }
 }
