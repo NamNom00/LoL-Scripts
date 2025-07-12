@@ -34,9 +34,21 @@ GodModeButton.Font = Enum.Font.Gotham
 GodModeButton.TextSize = 16
 GodModeButton.Parent = MainFrame
 
+-- Inside UI.luau
+local GlassESP = Instance.new("TextButton")
+GlassESP.Size = UDim2.new(1, -20, 0, 40)
+GlassESP.Position = UDim2.new(0, 10, 0, 90) -- Adjust Y to avoid overlap
+GlassESP.Text = "Glass Bridge ESP"
+GlassESP.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+GlassESP.TextColor3 = Color3.fromRGB(0, 170, 255)
+GlassESP.Font = Enum.Font.Gotham
+GlassESP.TextSize = 16
+GlassESP.Parent = MainFrame
+
 return {
     MainFrame = MainFrame,
     Buttons = {
         GodMode = GodModeButton,
+        Dalgona = DalgonaButton
     }
 }
